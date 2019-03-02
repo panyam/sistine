@@ -50,6 +50,7 @@ export class Stage {
         this._kickOffRepaint();
 
         var self = this;
+        /*
         events.GlobalHub.on(models.EV_SHAPE_ADDED, function(event) {
             self.paneNeedsRepaint(event.shape.pane);
         }).on(models.EV_SHAPE_REMOVED, function(event) {
@@ -57,6 +58,23 @@ export class Stage {
         }).on(models.EV_PROPERTY_CHANGED, function(event) {
             self.paneNeedsRepaint(event.source.pane)
         })
+        */
+        events.GlobalHub.addHandler(models.EV_SHAPE_ADDED, this);
+        events.GlobalHub.addHandler(models.EV_SHAPE_REMOVED, this);
+        events.GlobalHub.addHandler(models.EV_PROPERTY_CHANGED, this);
+    }
+
+    beforeEvent(eventType, event) { }
+    onEvent(eventType, event) {
+        if (eventType == models.EV_SHAPE_ADDED) {
+            this.paneNeedsRepaint(event.shape.pane);
+        }
+        else if (eventType == models.EV_SHAPE_ADDED) {
+            this.paneNeedsRepaint(event.shape.pane);
+        }
+        else {
+            this.paneNeedsRepaint(event.source.pane)
+        }
     }
 
     get touchContext() {
@@ -288,12 +306,18 @@ export class ShapeIndex {
         this._allShapes = [];
         this.defaultPane = "main";
         this.scene = scene;
-        var self = this;
-        events.GlobalHub.on(models.EV_SHAPE_ADDED, function(event) {
-            self.add(event.shape);
-        }).on(models.EV_SHAPE_REMOVED, function(event) {
-            self.remove(event.shape);
-        })
+        events.GlobalHub.addHandler(models.EV_SHAPE_ADDED, this);
+        events.GlobalHub.addHandler(models.EV_SHAPE_REMOVED, this);
+    }
+
+    beforeEvent(eventType, event) { }
+    onEvent(eventType, event) {
+        if (eventType == models.EV_SHAPE_ADDED) {
+            this.add(event.shape);
+        }
+        else if (eventType == models.EV_SHAPE_ADDED) {
+            this.remove(event.shape);
+        }
     }
 
     get scene() {

@@ -1,27 +1,16 @@
 
+export class EventHandler {
+    beforeEvent(eventType, event) { return true; }
+    onEvent(eventType, event) { return true; }
+}
+
 export class EventHub {
     constructor() {
-        this._onHandlers = {};
-        this._beforeHandlers = {};
+        this._handlers = {}
     }
 
-    before(eventType, handler) {
-        return this._addHandler(this._beforeHandlers, eventType, handler);
-    }
-
-    on(eventType, handler) {
-        return this._addHandler(this._onHandlers, eventType, handler);
-    }
-
-    removeBefore(eventType, handler) {
-        return this._removeHandler(this._beforeHandlers, eventType, handler);
-    }
-
-    removeOn(eventType, handler) {
-        return this._removeHandler(this._onHandlers, eventType, handler);
-    }
-
-    _addHandler(handlers, eventType, handler) {
+    addHandler(eventType, handler) {
+        var handlers = this._handlers;
         if (!(eventType in handlers)) {
             handlers[eventType] = [];
         }
@@ -29,8 +18,8 @@ export class EventHub {
         return this;
     }
 
-    _removeHandler(handlers, eventType, handler) {
-        handlers = handlers[eventType] || [];
+    removeHandler(eventType, handler) {
+        var handlers = this._handlers[eventType] || [];
         for (var i = 0;i < handlers.length;i++) {
             if (handlers[i] == handler) {
                 handlers.splice(i, 1);
@@ -45,18 +34,23 @@ export class EventHub {
      * a change has indeed gone through.
      */
     validateBefore(eventType, event) {
-        return this._trigger(this._beforeHandlers, eventType, event);
-    }
-    triggerOn(eventType, event) {
-        return this._trigger(this._onHandlers, eventType, event);
-    }
-
-    _trigger(handlers, eventType, event) {
-        handlers = handlers[eventType] || [];
+        var handlers = this._handlers[eventType] || [];
         var L = handlers.length;
         for (var i = 0;i < L;i++) {
             var handler = handlers[i];
-            if (handler(event) == false) {
+            if (handler.beforeEvent(eventType, event) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    triggerOn(eventType, event) {
+        var handlers = this._handlers[eventType] || [];
+        var L = handlers.length;
+        for (var i = 0;i < L;i++) {
+            var handler = handlers[i];
+            if (handler.onEvent(eventType, event) == false) {
                 return false;
             }
         }
